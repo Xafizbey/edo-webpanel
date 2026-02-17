@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { WEB_API_URL, TOKEN_COOKIE } from '@/lib/config';
+import { TOKEN_COOKIE, requireApiBaseUrl } from '@/lib/config';
 
 export async function backendFetch(path: string, init?: RequestInit): Promise<Response> {
   const token = cookies().get(TOKEN_COOKIE)?.value;
@@ -10,7 +10,8 @@ export async function backendFetch(path: string, init?: RequestInit): Promise<Re
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  return fetch(`${WEB_API_URL}${path}`, {
+  const apiBase = requireApiBaseUrl();
+  return fetch(`${apiBase}${path}`, {
     ...init,
     headers,
     cache: 'no-store'

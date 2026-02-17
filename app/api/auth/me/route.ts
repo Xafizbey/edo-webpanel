@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { TOKEN_COOKIE, WEB_API_URL } from '@/lib/config';
+import { TOKEN_COOKIE, requireApiBaseUrl } from '@/lib/config';
 import { tokenFromCookie } from '@/lib/route-helpers';
 
 export async function GET() {
@@ -7,11 +7,28 @@ export async function GET() {
   if (!token) {
     return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Нет доступа' } }, { status: 401 });
   }
+  let apiBase: string;
+  try {
+    apiBase = requireApiBaseUrl();
+  } catch {
+    return NextResponse.json(
+      { error: { code: 'MISCONFIGURED', message: 'WEB_API_URL is not configured' } },
+      { status: 500 }
+    );
+  }
 
-  const response = await fetch(`${WEB_API_URL}/auth/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store'
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${apiBase}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store'
+    });
+  } catch {
+    return NextResponse.json(
+      { error: { code: 'UPSTREAM_UNAVAILABLE', message: 'Backend API is unreachable' } },
+      { status: 502 }
+    );
+  }
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data?.role !== 'ADMIN') {
