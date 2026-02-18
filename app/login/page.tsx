@@ -18,6 +18,9 @@ function LoginContent() {
     if (params.get('reason') === 'no_access') {
       toast.error('Нет доступа');
     }
+    if (params.get('reason') === 'server_error') {
+      toast.error('Сервер временно недоступен');
+    }
   }, [params]);
 
   const onSubmit = async (e: FormEvent) => {

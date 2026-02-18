@@ -45,7 +45,9 @@ export default async function AdminDocumentDetailPage({ params }: PageProps) {
   if (!docResp.ok) notFound();
 
   const doc = await parseJsonOrThrow<DetailResponse>(docResp);
-  const timeline = await parseJsonOrThrow<TimelineResponse>(timelineResp);
+  const timeline = timelineResp.ok
+    ? await parseJsonOrThrow<TimelineResponse>(timelineResp)
+    : { approvalSteps: [], auditLogs: [] };
 
   return (
     <div className="space-y-4">

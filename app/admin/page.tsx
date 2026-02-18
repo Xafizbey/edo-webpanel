@@ -19,6 +19,19 @@ interface AuditItem {
 
 export default async function AdminDashboardPage() {
   const [metricsResp, auditResp] = await Promise.all([backendFetch('/admin/metrics'), backendFetch('/audit?limit=20')]);
+  if (!metricsResp.ok || !auditResp.ok) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Ошибка загрузки панели</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground">
+          Проверьте доступность backend и переменную `WEB_API_URL` в Vercel.
+        </CardContent>
+      </Card>
+    );
+  }
+
   const metrics = await parseJsonOrThrow<MetricsResponse>(metricsResp);
   const audit = await parseJsonOrThrow<AuditItem[]>(auditResp);
 

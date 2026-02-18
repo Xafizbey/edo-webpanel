@@ -10,12 +10,31 @@ export async function backendFetch(path: string, init?: RequestInit): Promise<Re
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  const apiBase = requireApiBaseUrl();
-  return fetch(`${apiBase}${path}`, {
-    ...init,
-    headers,
-    cache: 'no-store'
-  });
+  let apiBase: string;
+  try {
+    apiBase = requireApiBaseUrl();
+  } catch {
+    return new Response(JSON.stringify({ error: { code: 'MISCONFIGURED', message: 'WEB_API_URL is not configured' } }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  try {
+    return await fetch(`${apiBase}${path}`, {
+      ...init,
+      headers,
+      cache: 'no-store'
+    });
+  } catch {
+    return new Response(
+      JSON.stringify({ error: { code: 'UPSTREAM_UNAVAILABLE', message: 'Backend API is unreachable' } }),
+      {
+        status: 502,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
 }
 
 export async function parseJsonOrThrow<T>(response: Response): Promise<T> {

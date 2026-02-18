@@ -27,6 +27,18 @@ export default async function AdminDocumentsPage({ searchParams }: Props) {
   params.set('pageSize', String(pageSize));
 
   const response = await backendFetch(`/documents?${params.toString()}`);
+  if (!response.ok) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Документы недоступны</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground">
+          Не удалось получить данные. Проверьте backend и авторизацию администратора.
+        </CardContent>
+      </Card>
+    );
+  }
   const data = await parseJsonOrThrow<PagedDocuments>(response);
 
   return (

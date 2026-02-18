@@ -19,7 +19,7 @@ export async function requireAdmin(): Promise<AdminUser> {
 
   const meResp = await backendFetch('/auth/me');
   if (!meResp.ok) {
-    redirect('/login?reason=no_access');
+    redirect('/login?reason=server_error');
   }
 
   const me = await parseJsonOrThrow<{ id: string; fullName: string; email: string; role: string; department: string }>(
